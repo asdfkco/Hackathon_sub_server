@@ -16,6 +16,7 @@ def extract_text_from_image(image_path):
     response = client.text_detection(image=image)
 
     texts = response.text_annotations
+
     image_file
     if texts:
         extracted_text = texts
@@ -26,6 +27,8 @@ def extract_text_from_image(image_path):
 extracted_text = extract_text_from_image(image_path)
 
 def dis(text):
+    found_text = False
+
     for text in extracted_text:
         # print(text.description)
         if '성장곡선' in text.description :
@@ -36,9 +39,8 @@ def dis(text):
             gen(image_path)
             print("근육곡선")
             break
-        else :
-            print("인바디 검사지가 아닙니다")
-            break
+    if not found_text :
+        print("인바디 검사지가 아닙니다")
 
 def crop_image(input_image_path, output_image_path, left, top, right, bottom):
     try:

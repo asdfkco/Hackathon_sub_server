@@ -1,13 +1,18 @@
 import os
 import time
-
+import re
 from PIL import Image
 from google.cloud import vision
 import io
+from multiprocessing import Process
+from numba import jit
 
 # image_path : str = input()
-image_path = 'sungjang.png'
+image_path = 'gen.png'
+
+
 def extract_text_from_image(image_path):
+    global text_r
     with io.open(image_path, 'rb') as image_file:
         content = image_file.read()
 
@@ -22,29 +27,39 @@ def extract_text_from_image(image_path):
         extracted_text = texts
         if 'cliping' in image_path :
             for text in extracted_text:
-                text_r = text.description.replace("\n","")
+                text_r = text.description.replace("\n"," ")
+                break
+            return text_r
+        elif 'data' in image_path:
+            for text in extracted_text:
+                text_r = text.description.replace("\n"," ")
                 print(text_r)
+                break
+            return text_r
         return extracted_text
     else:
         return False
 
 extracted_text = extract_text_from_image(image_path)
 
+
 def dis(text):
+    start_time = time.time()
     found_text = False
 
     for text in extracted_text:
         # print(text.description)
         if '성장곡선' in text.description :
-            sungjang(image_path)
+            print(sungjang(image_path))
             print("성장곡선")
             break
         elif '부위별근육곡선' and '부위별체지방분석' in  text.description :
-            gen(image_path)
+            print(gen(image_path))
             print("근육곡선")
             break
-    if not found_text :
-        print("인바디 검사지가 아닙니다")
+        if not found_text :
+            print("인바디 검사지가 아닙니다")
+            break
 
 def crop_image(input_image_path, output_image_path, left, top, right, bottom):
     try:
@@ -60,8 +75,14 @@ def crop_image(input_image_path, output_image_path, left, top, right, bottom):
     except Exception as e:
         print(f'Error occurred while cropping the image: {e}')
 
-
 def sungjang(input_image):
+    번호에서성별 = 'data1.png'
+    체수분체중 = 'data2.png'
+    골격근 = 'data3.png'
+    체지방량 = 'data4.png'
+    BMI = 'data5.png'
+    체지방률 = 'data6.png'
+    성장점수 = 'data7.png'
     output_image_path = 'sungjang_cliping.png'
     # 성장곡선 케이스
     left = 0
@@ -69,23 +90,76 @@ def sungjang(input_image):
     right = 1600
     bottom = 1100
     crop_image(input_image, output_image_path, left, top, right, bottom)
-    extract_text_from_image(output_image_path)
-    # os.remove(output_image_path)
+    번호에서성별_data = detail_data('sungjang_cliping.png', 번호에서성별, 55, 25, 1560, 65)
+    체수분체중_data = detail_data('sungjang_cliping.png', 체수분체중, 690, 140, 130+690, 140+250)
+    골격근_data =  detail_data('sungjang_cliping.png', 골격근, 250,595, 250+740,595+42)
+    체지방량_data = detail_data('sungjang_cliping.png', 체지방량, 250,660, 250+740,660+42)
+    BMI_data = detail_data('sungjang_cliping.png', BMI, 250,835, 250+740,835+42)
+    체지방률_data = detail_data('sungjang_cliping.png', 체지방률, 250,900, 250+740,900+42)
+    성장점수_data = detail_data('sungjang_cliping.png', 성장점수, 1170, 205, 1170+105, 205+50)
+    os.remove(output_image_path)
+    return {
+        "번호,신장,나이,성별,검사일시": 번호에서성별_data,
+        "체수분,단백질,무기질,체지방,체중": 체수분체중_data,
+        "골격근" : 골격근_data,
+        "체지방량" : 체지방량_data,
+        "BMI" : BMI_data,
+        "체지방률" : 체지방률_data,
+        "성장점수" : 성장점수_data
+    }
 
 def gen(input_image):
     output_image_path = 'gen_cliping.png'
+    번호에서성별 = 'data1.png'
+    체수분체중 = 'data2.png'
+    골격근 = 'data3.png'
+    체지방량 = 'data4.png'
+    BMI = 'data5.png'
+    체지방률 = 'data6.png'
+    성장점수 = 'data7.png'
+
     # 근육량 분포 케이스
     left = 0
     top = 150
     right = 1600
     bottom = 1250
     crop_image(input_image, output_image_path, left, top, right, bottom)
-    extract_text_from_image(output_image_path)
-    # os.remove(output_image_path)
+
+    end_time = time.time()
+    print(f"실행 시간: {end_time - start_time:.2f}초")
+    번호에서성별_data = detail_data('gen_cliping.png',번호에서성별,40,25,1560,65)
+    체수분체중_data = detail_data('gen_cliping.png', 체수분체중, 685, 175, 685+120, 175+250)
+    골격근_data = detail_data('gen_cliping.png', 골격근, 235,670,235+720,670+42)
+    체지방량_data = detail_data('gen_cliping.png', 체지방량, 235, 735, 235+720, 735+42)
+    BMI_data = detail_data('gen_cliping.png', BMI, 235, 950, 235+720, 950+42)
+    체지방률_data = detail_data('gen_cliping.png', 체지방률, 235, 1010, 235+720, 1010+42)
+    성장점수_data = detail_data('gen_cliping.png', 성장점수, 1175, 200, 1175+105, 200+50)
+    os.remove(output_image_path)
+    return {
+        "번호,신장,나이,성별,검사일시": 번호에서성별_data,
+        "체수분,단백질,무기질,체지방,체중": 체수분체중_data,
+        "골격근": 골격근_data,
+        "체지방량": 체지방량_data,
+        "BMI": BMI_data,
+        "체지방률": 체지방률_data,
+        "성장점수": 성장점수_data
+    }
+
+def detail_data(input_image, output_image_path, left, top, right, bottom):
+    crop_image(input_image, output_image_path, left, top, right, bottom)
+    data_body = re.findall("(\d*\.?\d+)",extract_text_from_image(output_image_path))
+    os.remove(output_image_path)
+    print(data_body)
+    return data_body
+
 
 if __name__ == "__main__":
     start_time = time.time()
-    dis(extract_text_from_image(image_path))
+    # 이미지받고 패스
+    Process(dis(extract_text_from_image(image_path))).start()
     end_time = time.time()
     print(f"실행 시간: {end_time - start_time:.2f}초")
+
+
+#    json 가공
 

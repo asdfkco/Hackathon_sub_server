@@ -1,3 +1,4 @@
+import os
 import time
 
 from PIL import Image
@@ -5,7 +6,7 @@ from google.cloud import vision
 import io
 
 # image_path : str = input()
-image_path = 'gen.png'
+image_path = 'sungjang.png'
 def extract_text_from_image(image_path):
     with io.open(image_path, 'rb') as image_file:
         content = image_file.read()
@@ -13,13 +14,16 @@ def extract_text_from_image(image_path):
     client = vision.ImageAnnotatorClient.from_service_account_file('iron-potion-393208-29d8e7c7deed.json')
 
     image = vision.Image(content=content)
-    response = client.text_detection(image=image)
+    response = client.document_text_detection(image=image)
 
     texts = response.text_annotations
 
-    image_file
     if texts:
         extracted_text = texts
+        if 'cliping' in image_path :
+            for text in extracted_text:
+                text_r = text.description.replace("\n","")
+                print(text_r)
         return extracted_text
     else:
         return False
@@ -65,6 +69,8 @@ def sungjang(input_image):
     right = 1600
     bottom = 1100
     crop_image(input_image, output_image_path, left, top, right, bottom)
+    extract_text_from_image(output_image_path)
+    # os.remove(output_image_path)
 
 def gen(input_image):
     output_image_path = 'gen_cliping.png'
@@ -74,7 +80,8 @@ def gen(input_image):
     right = 1600
     bottom = 1250
     crop_image(input_image, output_image_path, left, top, right, bottom)
-
+    extract_text_from_image(output_image_path)
+    # os.remove(output_image_path)
 
 if __name__ == "__main__":
     start_time = time.time()

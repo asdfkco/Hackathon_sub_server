@@ -1,5 +1,7 @@
 # created by virtualenv automatically
-venv/
+../venv/
 .idea/
-ocr_test_file/iron-potion-393208-29d8e7c7deed.json
+server/iron-potion-393208-29d8e7c7deed.json
+server/iron-potion-393208-db8a054e2128.json
+server/trim-approach-394612-22928cda9ecb.json
 

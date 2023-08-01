@@ -7,7 +7,7 @@ def extract_text_from_image(image_path):
     with io.open(image_path, 'rb') as image_file:
         content = image_file.read()
 
-    client = vision.ImageAnnotatorClient.from_service_account_file('iron-potion-393208-29d8e7c7deed.json')
+    client = vision.ImageAnnotatorClient.from_service_account_file('../server/iron-potion-393208-29d8e7c7deed.json')
 
     image = vision.Image(content=content)
     response = client.text_detection(image=image)

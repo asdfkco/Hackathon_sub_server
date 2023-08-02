@@ -15,14 +15,14 @@ class Item(BaseModel):
 
 @app.post("/ocr_file")
 def ocr_send_data(item:Item):
-    print(item.file_name)
+    # print(item.file_name)
+
     print(os.path.dirname(os.getcwd())+"/tmp/"+item.file_name)
     body_info = None
     start_time = time.time()
     ocr.image_size(os.path.dirname(os.getcwd())+"/tmp/"+item.file_name)
     with ThreadPoolExecutor() as executor:
-        body_info = executor.submit(ocr.dis,executor.submit(executor.submit(ocr.data,os.path.dirname(os.getcwd())+"/tmp/"+item.file_name),item.file_name),os.path.dirname(os.getcwd())+"/tmp/"+item.file_name)
-        body_info = body_info.result()
+        body_info = executor.submit(ocr.dis,executor.submit(executor.submit(ocr.data,os.path.dirname(os.getcwd())+"/tmp/"+item.file_name),os.path.dirname(os.getcwd())+"/tmp/"+item.file_name),os.path.dirname(os.getcwd())+"/tmp/"+item.file_name).result()
     end_time = time.time()
     print(f"실행 시간: {end_time - start_time:.2f}초")
     return body_info

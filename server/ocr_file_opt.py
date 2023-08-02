@@ -4,12 +4,15 @@ import re
 from PIL import Image
 from google.cloud import vision
 import io
+import uuid
 # from concurrent.futures import ThreadPoolExecutor
 
 # image_path : str = input()
 
 # absPath = os.path.dirname(os.getcwd())
 # image_path = absPath+'/tmp/gen.png'
+
+
 
 def image_size(path):
     im = Image.open(path)
@@ -23,7 +26,7 @@ def extract_text_from_image(image_path):
         content = image_file.read()
 
     client = vision.ImageAnnotatorClient.from_service_account_file(
-        '/Users/kim-chanok/Desktop/toooooooon/Hackathon_sub_server/server/iron-potion-393208-db8a054e2128.json')
+        os.getcwd()+'/iron-potion-393208-db8a054e2128.json')
 
     image = vision.Image(content=content)
     response = client.document_text_detection(image=image)
@@ -83,17 +86,20 @@ def crop_image(input_image_path, output_image_path, left, top, right, bottom):
         print(f'Error occurred while cropping the image: {e}')
 
 
+def random():
+    return uuid.uuid1().hex
+
 def sungjang(input_image):
-    번호에서성별 = '../tmp/data1.png'
-    체수분체중 = '../tmp/data2.png'
-    골격근 = '../tmp/data3.png'
-    BMI = '../tmp/data4.png'
-    체지방률 = '../tmp/data5.png'
-    성장점수 = '../tmp/data6.png'
-    output_image_path = '../tmp/sungjang_cliping.png'
+    번호에서성별= '../tmp/1_data_'+random()+'.png'
+    체수분체중 = '../tmp/2_data_'+random()+'.png'
+    골격근 = '../tmp/3_data_'+random()+'.png'
+    BMI = '../tmp/4_data_'+random()+'.png'
+    체지방률 = '../tmp/5_data_'+random()+'.png'
+    성장점수 = '../tmp/6_data_'+random()+'.png'
+    output_image_path = '../tmp/cliping_img_'+random()+'.png'
     # 성장곡선 케이스
     left, top, right, bottom = 0, 150, 1600, 1100
-
+    # print(번호에서성별,체수분체중,골격근,BMI,체지방률,성장점수,output_image_path)
 
     crop_image(input_image, output_image_path, left, top, right, bottom)
     번호에서성별_data: dict = detail_data(output_image_path, 번호에서성별, 55, 25, 1560, 65).split(' ')
@@ -121,13 +127,13 @@ def sungjang(input_image):
 
 
 def gen(input_image):
-    번호에서성별 = '../tmp/data1.png'
-    체수분체중 = '../tmp/data2.png'
-    골격근 = '../tmp/data3.png'
-    BMI = '../tmp/data4.png'
-    체지방률 = '../tmp/data5.png'
-    성장점수 = '../tmp/data6.png'
-    output_image_path = '../tmp/gen_cliping.png'
+    번호에서성별= '../tmp/1_data_'+random()+'.png'
+    체수분체중 = '../tmp/2_data_'+random()+'.png'
+    골격근 = '../tmp/3_data_'+random()+'.png'
+    BMI = '../tmp/4_data_'+random()+'.png'
+    체지방률 = '../tmp/5_data_'+random()+'.png'
+    성장점수 = '../tmp/6_data_'+random()+'.png'
+    output_image_path = '../tmp/cliping_img_'+random()+'.png'
 
     # 근육량 분포 케이스
     left, top, right, bottom = 0, 150, 1600, 1250
@@ -161,7 +167,9 @@ def gen(input_image):
 def detail_data(input_image, output_image_path, left, top, right, bottom):
     crop_image(input_image, output_image_path, left, top, right, bottom)
     data_body = extract_text_from_image(output_image_path)
+    print(input_image,output_image_path)
     os.remove(output_image_path)
+    # print("지워지지않는다.")
     print(data_body)
     return data_body
 

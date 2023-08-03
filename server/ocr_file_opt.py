@@ -1,17 +1,10 @@
 import os
-import time
 import re
 from PIL import Image
 from google.cloud import vision
 import io
 import uuid
-# from concurrent.futures import ThreadPoolExecutor
-
-# image_path : str = input()
-
-# absPath = os.path.dirname(os.getcwd())
-# image_path = absPath+'/tmp/gen.png'
-
+from concurrent.futures import ProcessPoolExecutor
 
 
 def image_size(path):
@@ -51,11 +44,15 @@ def extract_text_from_image(image_path):
         return False
 
 def data(image_path):
-    extracted_text = extract_text_from_image(image_path)
+    output_image_path = '../tmp/'+random()+'.png'
+    crop_image(image_path, output_image_path, 30, 1120, 30+300, 1120+360)
+    extracted_text = extract_text_from_image(output_image_path)
+    os.remove(output_image_path)
     return extracted_text
 
+# dis(data(path),path)
 
-def dis(text,path):
+def dis(path):
     found_text = False
 
     for text in data(path):
@@ -63,11 +60,11 @@ def dis(text,path):
         if '성장곡선' in text.description:
             print("성장곡선")
             return sungjang(path)
-        elif '부위별근육곡선' and '부위별체지방분석' in text.description:
-            print("근육곡선")
+        elif '부위별근육분석' in text.description:
+            print("근육분석")
             return gen(path)
         if not found_text:
-            print("인바디 검사지가 아닙니다")
+            raise Exception('사진이 알맞지 않습니다')
             break
 
 
@@ -102,13 +99,15 @@ def sungjang(input_image):
     # print(번호에서성별,체수분체중,골격근,BMI,체지방률,성장점수,output_image_path)
 
     crop_image(input_image, output_image_path, left, top, right, bottom)
-    번호에서성별_data: dict = detail_data(output_image_path, 번호에서성별, 55, 25, 1560, 65).split(' ')
-    체수분체중_data: dict = detail_data(output_image_path, 체수분체중, 690, 140, 130 + 690, 140 + 250).split(' ')
-    골격근_data : str = detail_data(output_image_path, 골격근, 250, 595, 250 + 740, 595 + 42)
-    BMI_data : str= detail_data(output_image_path, BMI, 250, 835, 250 + 740, 835 + 42)
-    체지방률_data : str= detail_data(output_image_path, 체지방률, 250, 900, 250 + 740, 900 + 42)
-    체지방률_data : str = re.findall("(\d*\.?\d+)", 체지방률_data)
-    성장점수_data : str= detail_data(output_image_path, 성장점수, 1170, 205, 1170 + 105, 205 + 50)
+    with ProcessPoolExecutor(max_workers=6) as exe:
+            번호에서성별_data: dict = detail_data(output_image_path, 번호에서성별, 55, 25, 1560, 65).split(' ')
+            체수분체중_data: dict = detail_data(output_image_path, 체수분체중, 690, 140, 130 + 690, 140 + 250).split(' ')
+            골격근_data : str = detail_data(output_image_path, 골격근, 250, 595, 250 + 740, 595 + 42)
+            BMI_data : str= detail_data(output_image_path, BMI, 250, 835, 250 + 740, 835 + 42)
+            체지방률_data : str= detail_data(output_image_path, 체지방률, 250, 900, 250 + 740, 900 + 42)
+            체지방률_data : str = re.findall("(\d*\.?\d+)", 체지방률_data)
+            성장점수_data : str= detail_data(output_image_path, 성장점수, 1170, 205, 1170 + 105, 205 + 50)
+    exe.shutdown(wait=True)
     os.remove(output_image_path)
     return {
         "height": 번호에서성별_data[1].replace('cm',''),
@@ -138,14 +137,15 @@ def gen(input_image):
     # 근육량 분포 케이스
     left, top, right, bottom = 0, 150, 1600, 1250
     crop_image(input_image, output_image_path, left, top, right, bottom)
-
-    번호에서성별_data: dict = detail_data(output_image_path, 번호에서성별, 40, 25, 1560, 65).split(' ')
-    체수분체중_data: dict = detail_data(output_image_path, 체수분체중, 685, 175, 685 + 120, 175 + 250).split(' ')
-    골격근_data: str = detail_data(output_image_path, 골격근, 235, 670, 235 + 720, 670 + 42)
-    BMI_data: str = detail_data(output_image_path, BMI, 235, 950, 235 + 720, 950 + 42)
-    체지방률_data: str = detail_data(output_image_path, 체지방률, 235, 1010, 235 + 720, 1010 + 42)
-    체지방률_data: str = re.findall("(\d*\.?\d+)", 체지방률_data)
-    성장점수_data: str = detail_data(output_image_path, 성장점수, 1175, 200, 1175 + 105, 200 + 50)
+    with ProcessPoolExecutor(max_workers=6) as exe:
+        번호에서성별_data: dict = detail_data(output_image_path, 번호에서성별, 40, 25, 1560, 65).split(' ')
+        체수분체중_data: dict = detail_data(output_image_path, 체수분체중, 685, 175, 685 + 120, 175 + 250).split(' ')
+        골격근_data: str = detail_data(output_image_path, 골격근, 235, 670, 235 + 720, 670 + 42)
+        BMI_data: str = detail_data(output_image_path, BMI, 235, 950, 235 + 720, 950 + 42)
+        체지방률_data: str = detail_data(output_image_path, 체지방률, 235, 1010, 235 + 720, 1010 + 42)
+        체지방률_data: str = re.findall("(\d*\.?\d+)", 체지방률_data)
+        성장점수_data: str = detail_data(output_image_path, 성장점수, 1175, 200, 1175 + 105, 200 + 50)
+    exe.shutdown(wait=True)
     os.remove(output_image_path)
     return {
         "height": 번호에서성별_data[1].replace('cm',''),
@@ -167,9 +167,8 @@ def gen(input_image):
 def detail_data(input_image, output_image_path, left, top, right, bottom):
     crop_image(input_image, output_image_path, left, top, right, bottom)
     data_body = extract_text_from_image(output_image_path)
-    print(input_image,output_image_path)
+    # print(input_image,output_image_path)
     os.remove(output_image_path)
     # print("지워지지않는다.")
     print(data_body)
     return data_body
-
